@@ -1,5 +1,6 @@
 import { Wallet, providers } from 'ethers'
 import Everpay, { ChainType } from 'everpay'
+import { signMessageAsync } from 'everpay/esm/lib/sign'
 import { createData, DataItemCreateOptions } from 'arseeding-arbundles'
 import EthereumSigner from 'arseeding-arbundles/src/signing/chains/ethereumSigner'
 import axios from 'axios'
@@ -7,7 +8,8 @@ import { payOrder } from './payOrder'
 import { InjectedEthereumSigner, InjectedArweaveSigner } from 'arseeding-arbundles/src/signing'
 import { GenAPIReturn, GenArweaveAPIReturn, GenNodeAPIReturn } from './types'
 import ArweaveSigner from 'arseeding-arbundles/src/signing/chains/ArweaveSigner'
-
+import { InjectedWebauthSigner } from 'arbundles-fido/src/signing'
+import { createData as createDataTest } from 'arbundles-fido'
 export const genAPI = async (windowEthereum: any): Promise<GenAPIReturn> => {
   await windowEthereum.request({ method: 'eth_requestAccounts' })
   const provider = new providers.Web3Provider(windowEthereum)
@@ -18,7 +20,7 @@ export const genAPI = async (windowEthereum: any): Promise<GenAPIReturn> => {
   return {
     signer,
     async sendAndPay (arseedingUrl: string, data: Buffer, tag: string, opts: DataItemCreateOptions, needSeq?: boolean, debug?: boolean) {
-      const dataItem = createData(
+      const dataItem = createDataTest(
         data,
         signer,
         opts
@@ -33,6 +35,7 @@ export const genAPI = async (windowEthereum: any): Promise<GenAPIReturn> => {
         header.Sort = 'true'
       }
       const tokenSymbol = tag.split('-')[1]
+      console.log(dataItem.getRaw(), 'dataItem.getRaw()')
       const res = await api.post(`/bundle/tx/${tokenSymbol}`, dataItem.getRaw(), {
         headers: header,
         maxBodyLength: Infinity
@@ -103,7 +106,7 @@ export const genArweaveAPI = async (windowArweaveWallet: any): Promise<GenArweav
   return {
     signer,
     async sendAndPay (arseedingUrl: string, data: Buffer, tag: string, opts: DataItemCreateOptions, needSeq?: boolean, debug?: boolean) {
-      const dataItem = createData(
+      const dataItem = createDataTest(
         data,
         signer,
         opts
@@ -118,6 +121,7 @@ export const genArweaveAPI = async (windowArweaveWallet: any): Promise<GenArweav
         header.Sort = 'true'
       }
       const tokenSymbol = tag.split('-')[1]
+      console.log(dataItem.getRaw().toJSON, 'dataItem.getRaw()')
       const res = await api.post(`/bundle/tx/${tokenSymbol}`, dataItem.getRaw(), {
         headers: header,
         maxBodyLength: Infinity
@@ -142,6 +146,60 @@ export const genArweaveAPI = async (windowArweaveWallet: any): Promise<GenArweav
         return {
           order
         }
+      }
+    }
+  }
+}
+interface State{
+  everpay: any
+  publicKey: string
+  debug: boolean
+}
+export const getWebAuthAPI = async (params: State): Promise<any> => {
+  const account = await params.everpay.smartAccountAuth('https://app-dev.permaswap.network/permalogo.svg')
+  const everpayT = new Everpay({
+    account,
+    isSmartAccount: true
+  })
+  const a: any = {
+    everpay: { ...everpayT, signMessageAsync },
+    publicKey: params.publicKey,
+    account: account,
+    debug: params.debug
+  }
+  const signer = new InjectedWebauthSigner(a)
+  await signer.setPublicKey()
+  return {
+    signer,
+    async sendAndPay (arseedingUrl: string, data: Buffer, tag: string, opts: DataItemCreateOptions, needSeq?: boolean, debug?: boolean) {
+      const dataItem = createDataTest(
+        data,
+        signer,
+        opts
+      )
+      await dataItem.sign(signer)
+
+      const api = axios.create({ baseURL: arseedingUrl })
+      const header = {
+        'Content-Type': 'application/octet-stream'
+      } as any
+      if (needSeq !== undefined && needSeq) {
+        header.Sort = 'true'
+      }
+      console.log(api, 'api')
+      const tokenSymbol = tag.split('-')[1]
+      console.log(tokenSymbol, 'tokenSymbol')
+      console.log(dataItem.getRaw(), 'dataItem.getRaw()')
+      const res = await api.post(`/bundle/tx/${tokenSymbol}`, dataItem.getRaw(), {
+        headers: header,
+        maxBodyLength: Infinity
+      })
+      console.log(res, 'res')
+      const order = { ...res.data, tag }
+      const { fee } = order
+      console.log(order, 'order')
+      if (+fee > 0) {
+        console.log(fee, 'fee')
       }
     }
   }
