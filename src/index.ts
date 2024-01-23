@@ -5,11 +5,12 @@ import { createData, DataItemCreateOptions } from 'arseeding-arbundles'
 import EthereumSigner from 'arseeding-arbundles/src/signing/chains/ethereumSigner'
 import axios from 'axios'
 import { payOrder } from './payOrder'
-import { InjectedEthereumSigner, InjectedArweaveSigner } from 'arseeding-arbundles/src/signing'
+// import { InjectedEthereumSigner, InjectedArweaveSigner } from 'arseeding-arbundles/src/signing'
 import { GenAPIReturn, GenArweaveAPIReturn, GenNodeAPIReturn } from './types'
 import ArweaveSigner from 'arseeding-arbundles/src/signing/chains/ArweaveSigner'
-import { InjectedWebauthSigner } from 'arbundles-fido/src/signing'
+import { InjectedWebauthSigner, InjectedArweaveSigner, InjectedEthereumSigner } from 'arbundles-fido/src/signing'
 import { createData as createDataTest } from 'arbundles-fido'
+// import { InjectedEthereumSigner, InjectedArweaveSigner } from 'arbundles-fido/src/signing'
 export const genAPI = async (windowEthereum: any): Promise<GenAPIReturn> => {
   await windowEthereum.request({ method: 'eth_requestAccounts' })
   const provider = new providers.Web3Provider(windowEthereum)
@@ -190,6 +191,7 @@ export const getWebAuthAPI = async (params: State): Promise<any> => {
       const tokenSymbol = tag.split('-')[1]
       console.log(tokenSymbol, 'tokenSymbol')
       console.log(dataItem.getRaw(), 'dataItem.getRaw()')
+      console.log(data, 'buffer data')
       const res = await api.post(`/bundle/tx/${tokenSymbol}`, dataItem.getRaw(), {
         headers: header,
         maxBodyLength: Infinity

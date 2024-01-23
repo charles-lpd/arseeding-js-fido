@@ -1,5 +1,6 @@
 import { DataItemCreateOptions } from 'arseeding-arbundles'
-import { InjectedArweaveSigner, InjectedEthereumSigner, Signer } from 'arseeding-arbundles/src/signing'
+// import { InjectedArweaveSigner, InjectedEthereumSigner, Signer } from 'arseeding-arbundles/src/signing'
+import { InjectedArweaveSigner, InjectedEthereumSigner, Signer } from 'arbundles-fido/src/signing'
 import EthereumSigner from 'arseeding-arbundles/src/signing/chains/ethereumSigner'
 export interface Manifest {
   manifest: string

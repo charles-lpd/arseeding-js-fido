@@ -2120,10 +2120,10 @@ anymatch@^3.0.3:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-arbundles-fido@^0.0.17:
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/arbundles-fido/-/arbundles-fido-0.0.17.tgz#e6c356a4010208a12e4af6d8ad62ca8b21f172a4"
-  integrity sha512-A9vK+DKLiSIYOPSFeVqcxQlcCzOoKsM+D3vrFo8VMw1eMvvX4kdA6nQqh1U1Oxv+PLm91J6aNQXUFPjBzLc55g==
+arbundles-fido@^0.0.27:
+  version "0.0.27"
+  resolved "https://registry.yarnpkg.com/arbundles-fido/-/arbundles-fido-0.0.27.tgz#289b9bb931b4c2c9d33abe96e8184a2154c10514"
+  integrity sha512-5Bc6AsWRGMjwB0MqaAWKybbh9+KoQ/t5cyUin/PIkQswFm0WAlXqptVjJeZyJdqjx9Ai/RMqyWsmGRHUHPaSVQ==
   dependencies:
     "@noble/ed25519" "^1.6.1"
     "@randlabs/myalgo-connect" "^1.1.2"
