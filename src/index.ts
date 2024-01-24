@@ -1,6 +1,7 @@
 import { Wallet, providers } from 'ethers'
 import Everpay, { ChainType } from 'everpay'
 import { signMessageAsync } from 'everpay/esm/lib/sign'
+import { genEverId } from 'everpay/esm/utils/util'
 import { createData, DataItemCreateOptions } from 'arseeding-arbundles'
 import EthereumSigner from 'arseeding-arbundles/src/signing/chains/ethereumSigner'
 import axios from 'axios'
@@ -152,19 +153,24 @@ export const genArweaveAPI = async (windowArweaveWallet: any): Promise<GenArweav
   }
 }
 interface State{
+  websiteLogo: string
   everpay: any
   publicKey: string
   debug: boolean
 }
+export const getEverpayHost = (debug?: boolean): string => {
+  return debug === true ? 'https://api-dev.everpay.io' : 'https://api.everpay.io'
+}
 export const getWebAuthAPI = async (params: State): Promise<any> => {
-  const account = await params.everpay.smartAccountAuth('https://app-dev.permaswap.network/permalogo.svg')
+  const account = await params.everpay.smartAccountAuth(params.websiteLogo)
+  const publickeyInfo = await axios.get(`${getEverpayHost(params.debug)}/account/${genEverId(account)}`)
   const everpayT = new Everpay({
     account,
     isSmartAccount: true
   })
   const a: any = {
     everpay: { ...everpayT, signMessageAsync },
-    publicKey: params.publicKey,
+    publicKey: Object.values(publickeyInfo.data.publicValues)[0],
     account: account,
     debug: params.debug
   }
